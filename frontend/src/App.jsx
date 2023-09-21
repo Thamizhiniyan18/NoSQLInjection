@@ -1,6 +1,5 @@
 import "./App.css";
 import { useState } from "react";
-import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -9,27 +8,29 @@ const App = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit__Handler = async (event) => {
+  const onSubmit__Handler = (event) => {
     event.preventDefault();
 
     setIsLoading(true);
 
-    axios
-      .post("/api/users/login", {
-        username,
-        password,
-      })
+    fetch("/api/users/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    })
+      .then((response) => response.json())
       .then((response) => {
-        console.log(response.data);
-        toast.success(response.data.message);
-        toast.success(response.data.flag);
+        if (response.error) {
+          toast.error(response.error);
+        } else {
+          toast.success(response.message);
+          toast.success(response.flag);
+        }
       })
       .catch((error) => {
-        toast.error(error.response.data.message);
+        console.log(error);
       })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      .finally(() => setIsLoading(false));
   };
 
   return (
